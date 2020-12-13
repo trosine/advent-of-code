@@ -3,20 +3,10 @@
 https://adventofcode.com/2020/day/10
 """
 from itertools import combinations
+import functools
 import aoc
 
 PUZZLE = aoc.Puzzle(day=10, year=2020)
-
-
-def memoize(fun):
-    """Keep track of results for expensive functions"""
-    memo = {}
-
-    def helper(arg):
-        if arg not in memo:
-            memo[arg] = fun(arg)
-        return memo[arg]
-    return helper
 
 
 def valid_removal(removals):
@@ -30,7 +20,7 @@ def valid_removal(removals):
     return True
 
 
-@memoize
+@functools.cache
 def valid_chains(items):
     """Determine the number of valid chains in a list of length items"""
     if items <= 2:
