@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Puzzle related utilities/objects"""
 import argparse
 import time
