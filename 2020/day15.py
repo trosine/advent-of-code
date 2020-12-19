@@ -15,11 +15,16 @@ def solve(part='a'):
         rounds = 30000000
     starters = list(map(int, PUZZLE.input.split(',')))
     # starters = [0, 3, 6]
-    history = dict(zip(starters, range(len(starters)-1)))
+    history = [None] * rounds
+    for turn, stated in enumerate(starters[:-1]):
+        history[stated] = turn
     last_stated = starters[-1]
     for turn in range(len(starters), rounds):
-        when = history.get(last_stated, turn-1)
-        stated = turn - when - 1
+        when = history[last_stated]
+        if when is None:
+            stated = 0
+        else:
+            stated = turn - when - 1
         history[last_stated] = turn - 1
         last_stated = stated
     return last_stated
