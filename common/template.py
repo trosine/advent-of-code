@@ -9,6 +9,8 @@ PUZZLE = aoc.Puzzle(day=DAY, year=YEAR)
 
 def solve(part='a'):
     """Solve puzzle"""
+    if part == 'a':
+        pass
     # print(PUZZLE.input)
     return None
 
