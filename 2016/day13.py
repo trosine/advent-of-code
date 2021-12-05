@@ -36,24 +36,27 @@ def neighbors(coord, favorite):
             yield neighbor
 
 
+# this is a modified version of these two
 # https://www.educative.io/edpresso/how-to-implement-a-breadth-first-search-in-python
+# https://towardsdatascience.com/search-algorithm-breadth-first-search-with-python-50571a9bb85e
 def bfs_distance(start, end, favorite, depth=math.inf):
     """Calculate the shortest distance from start to end"""
+    visited = 0
     distance = {start: 0}
     queue = collections.deque([start])
 
     while queue:
+        visited += 1
         current = queue.popleft()
-        if distance[current] >= depth:
-            return distance[current], len(distance)
 
         for neighbor in neighbors(current, favorite):
             if neighbor == end:
                 return distance[current] + 1, len(distance)
             if neighbor not in distance:
-                queue.append(neighbor)
-                distance[neighbor] = distance[current] + 1
-    return -1
+                if distance[current] < depth:
+                    queue.append(neighbor)
+                    distance[neighbor] = distance[current] + 1
+    return -1, visited
 
 
 def solve(part='a'):
