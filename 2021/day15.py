@@ -25,39 +25,36 @@ def neighbors(pos, end):
 
 
 # https://benalexkeen.com/implementing-djikstras-shortest-path-algorithm-with-python/
+# modified: there's no need for edge relaxation
+# there's also no need to return to a location we've already been to because
+# we've already taken the fastest (or equivalent) route to get there
 def dijkstra(grid, start, end):
     """Find the shortest path cost from start to end"""
     shortest_paths = {start: 0}  # value is previous node, weight
     current_node = start
-    # visited = set()
+    total = len(grid)
     cycle = 0
 
     while current_node != end:
         cycle += 1
         if cycle % 1000 == 0:
-            print(cycle, end='\r')
-        # visited.add(current_node)
+            print(f'{cycle} / {total}', end='\r')
         del grid[current_node]
-        current_weight = shortest_paths[current_node]
+        # no need to return here
+        current_weight = shortest_paths.pop(current_node)
 
         for neighbor in neighbors(current_node, end):
-            if neighbor == current_node or neighbor not in grid:
+            if neighbor not in grid:
+                # never return to anywhere we've been
                 continue
             weight = grid[neighbor] + current_weight
             if neighbor not in shortest_paths:
                 shortest_paths[neighbor] = weight
-            # else:
-            #     # for this puzzle, this block may not be necessary
-            #     current_shortest_weight = shortest_paths[neighbor]
-            #     if current_shortest_weight > weight:
-            #         # improved shortest path
-            #         shortest_paths[neighbor] = weight
 
-        # find the next node (with the shortest path
+        # find the next node (with the shortest path)
         next_neighbors = {
             node: weight
             for node, weight in shortest_paths.items()
-            # if node not in visited
             if node in grid
             }
         current_node = min(next_neighbors, key=lambda x: next_neighbors[x])
@@ -78,7 +75,6 @@ def solve(part='a'):
     cols_per_tile = len(data[0])
     for row, weights in enumerate(data):
         for col, risk in enumerate(weights):
-            # base_pos = (row, col)
             for tile_row, tile_col in product(range(tiles), repeat=2):
                 insert_row = row + tile_row * rows_per_tile
                 insert_col = col + tile_col * cols_per_tile
@@ -86,9 +82,7 @@ def solve(part='a'):
                 if insert_risk == 0:
                     insert_risk = 9
                 grid[(insert_row, insert_col)] = insert_risk
-    end = max(grid.keys())
-    print(len(grid))
-    return dijkstra(grid, (0, 0), end)
+    return dijkstra(grid, (0, 0), max(grid.keys()))
 
 
 if __name__ == "__main__":
