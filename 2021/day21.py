@@ -2,6 +2,7 @@
 """
 https://adventofcode.com/2021/day/21
 """
+import collections
 import itertools
 
 import aoc
@@ -9,17 +10,43 @@ import aoc
 PUZZLE = aoc.Puzzle(day=21, year=2021)
 
 
+def solve_b(positions):
+    """Solve puzzle part b"""
+    rolls = collections.Counter(
+        sum(rolls)
+        for rolls in itertools.product(range(1, 4), repeat=3)
+        )
+    unfinished = {(positions[0], positions[1], 0, 0): 1}
+    finished = collections.defaultdict(int)
+    turn = 0
+    while unfinished:
+        # print(f'unfinished={len(unfinished)}, finished={finished}')
+        new_states = collections.defaultdict(int)
+        for roll, frequency in rolls.items():
+            for state, universes in unfinished.items():
+                state = list(state)
+                universes *= frequency
+                state[turn] = (state[turn] + roll) % 10 or 10
+                state[turn+2] += state[turn]
+                if state[turn+2] >= 21:
+                    finished[turn] += universes
+                else:
+                    new_states[tuple(state)] += universes
+        unfinished = new_states
+        turn = 1 - turn
+    return max(finished.values())
 
 
 def solve(part='a'):
     """Solve puzzle"""
-    if part == 'a':
-        pass
     positions = [
         int(player.split()[-1]) % 10
         for player in PUZZLE.input.splitlines()
         ]
     # positions = [4, 8]
+    if part == 'b':
+        return solve_b(positions)
+
     scores = [0, 0]
     player = 0
     rolls = 0
@@ -40,4 +67,4 @@ def solve(part='a'):
 
 if __name__ == "__main__":
     PUZZLE.report_a(solve('a'))
-    # PUZZLE.report_b(solve('b'))
+    PUZZLE.report_b(solve('b'))
