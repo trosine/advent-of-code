@@ -30,7 +30,7 @@ class State(collections.namedtuple('StateT', ['hall', 'rooms'])):
             if self.hall[start+1:end] != '.' * (end - start - 1):
                 # path blocked by another amphipod
                 continue
-            if room in ('..', f'.{kind}'):
+            if re.match(r'\.+' + kind + '*$', room):
                 depth = room.rindex('.')  # how deep into the room to go
                 new_hall = replace_char(self.hall, pos, '.')
                 new_room = replace_char(room, depth, kind)
@@ -130,12 +130,12 @@ def search(state):
 
 def solve(part='a'):
     """Solve puzzle"""
-    if part == 'b':
-        pass
-        # '#D#C#B#A#'
-        # '#D#B#A#C#'
     rooms = [''] * 4
-    findall = re.findall(r'[.A-D]+', PUZZLE.input)
+    data = PUZZLE.input.splitlines()
+    if part == 'b':
+        data.insert(3, '#D#C#B#A#')
+        data.insert(4, '#D#B#A#C#')
+    findall = re.findall(r'[.A-D]+', '\n'.join(data))
     hallway = findall.pop(0)
     for pos, amphipod in enumerate(findall):
         rooms[pos % 4] += amphipod
@@ -146,4 +146,4 @@ def solve(part='a'):
 
 if __name__ == "__main__":
     PUZZLE.report_a(solve('a'))
-    # PUZZLE.report_b(solve('b'))
+    PUZZLE.report_b(solve('b'))
