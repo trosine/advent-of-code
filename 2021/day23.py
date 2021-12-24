@@ -12,7 +12,7 @@ ROOM_OFFSETS = 'ABCD'
 ROOM_ENTRANCES = (2, 4, 6, 8)
 
 
-class State(collections.namedtuple('StateT', ['hall', 'rooms', 'cost'])):
+class State(collections.namedtuple('StateT', ['hall', 'rooms'])):
     """Represents the current state of the burrow"""
 
     def hall_to_room_moves(self):
@@ -38,7 +38,7 @@ class State(collections.namedtuple('StateT', ['hall', 'rooms', 'cost'])):
                 # steps to the entrance, 1 step into room, 1 room depth
                 cost = end - start + 1 + depth
                 cost *= 10 ** room_offset
-                yield State(''.join(new_hall), new_rooms, self.cost + cost)
+                yield cost, State(''.join(new_hall), new_rooms)
                 continue
 
     def room_to_hall_moves(self):
@@ -66,7 +66,7 @@ class State(collections.namedtuple('StateT', ['hall', 'rooms', 'cost'])):
                     # steps to the entrance, 1 step into room, 1 room depth
                     cost = end - start + 1 + depth
                     cost *= 10 ** ROOM_OFFSETS.index(kind)
-                    yield State(new_hall, new_rooms, self.cost + cost)
+                    yield cost, State(new_hall, new_rooms)
                 break  # deeper amphipods are blocked
 
     def moves(self):
@@ -96,25 +96,15 @@ def replace_item(sequence, index, replacement):
     return tuple(new)
 
 
-def solve(part='a'):
-    """Solve puzzle"""
-    if part == 'b':
-        pass
-        # '#D#C#B#A#'
-        # '#D#B#A#C#'
-    end_state = ('AA', 'BB', 'CC', 'DD')
-    rooms = [''] * 4
-    findall = re.findall(r'[.A-D]+', PUZZLE.input)
-    hallway = findall.pop(0)
-    for pos, amphipod in enumerate(findall):
-        rooms[pos % 4] += amphipod
-    state = State(hallway, tuple(rooms), 0)
-    # for new in state.moves():
-    #     print(new)
-    print(state)
+def search(state):
+    """Search for the lowest cost solution"""
+    room_len = len(state.rooms[0])
+    end_state = tuple(
+        kind * room_len
+        for kind in ROOM_OFFSETS
+        )
     queue = collections.deque([state])
-    # queue = None
-    seen = set()
+    seen = {state: 0}
     finished = 0
     best = float('inf')
     rounds = 0
@@ -122,18 +112,36 @@ def solve(part='a'):
         rounds += 1
         if rounds % 10000 == 0:
             print(f'{rounds}: q={len(queue)} f={finished}, b={best}', end='\r')
-        current = queue.pop()
-        # print(current)
+        current = queue.popleft()
         for new_state in current.moves():
-            if new_state in seen:
-                continue
+            new_cost = seen[current] + new_state[0]
+            new_state = new_state[1]
+            if new_state in seen and new_cost >= seen[new_state]:
+                continue  # already seen this with a better cost
+            seen[new_state] = new_cost
             if new_state.rooms == end_state:
                 finished += 1
-                best = min(best, new_state.cost)
-            elif state.cost < best:
+                best = min(best, new_cost)
+            elif new_cost < best:
                 queue.append(new_state)
     print(f'\n{rounds}: fin={finished}, best={best}')
     return best
+
+
+def solve(part='a'):
+    """Solve puzzle"""
+    if part == 'b':
+        pass
+        # '#D#C#B#A#'
+        # '#D#B#A#C#'
+    rooms = [''] * 4
+    findall = re.findall(r'[.A-D]+', PUZZLE.input)
+    hallway = findall.pop(0)
+    for pos, amphipod in enumerate(findall):
+        rooms[pos % 4] += amphipod
+    state = State(hallway, tuple(rooms))
+    print(state)
+    return search(state)
 
 
 if __name__ == "__main__":
