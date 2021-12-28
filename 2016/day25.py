@@ -87,7 +87,35 @@ def solve(part='a'):
             ]
         command[0] = instructions.get(command[0], command[0])
         program.append(command)
-    return fast_solve(program)
+    return slow_solve(program)
+
+
+def slow_solve(program):
+    """Solve using the real program"""
+    start = 0
+    while True:
+        start += 1
+        print(f'Testing {start}', end='\r')
+        for reg in REGISTERS:
+            REGISTERS[reg] = 0
+        REGISTERS['a'] = start
+        valid = True
+        compare = 0
+        while REGISTERS['p'] < len(program):
+            command = program[REGISTERS['p']]
+            if command == program[-1]:
+                break  # do not restart the loop
+            if command[0] == 'out':
+                if REGISTERS['b'] != compare:
+                    valid = False
+                    break
+                compare = 1 - compare
+                REGISTERS['p'] += 1
+            else:
+                command[0](program, *command[1:])
+        if valid and REGISTERS['b'] == 1:
+            return start
+    return None
 
 
 def fast_solve(program):
