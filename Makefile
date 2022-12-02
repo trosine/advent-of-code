@@ -1,5 +1,6 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-DAY:=$(shell date +%-d)
+TZ:="America/New_York"
+DAY:=$(shell TZ=$(TZ) date +%-d)
 YEAR:=$(shell date +%Y)
 ZERODAY:=$(shell printf "%02d" $(DAY))
 
