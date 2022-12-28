@@ -5,7 +5,7 @@ https://adventofcode.com/2022/day/15
 import re
 
 import aoc
-from lib.point import Point2D
+from point import Point2D
 
 PUZZLE = aoc.Puzzle(day=15, year=2022)
 PARSE = re.compile(
