@@ -31,7 +31,7 @@ class Puzzle():
     @property
     def timing(self):
         """Timing report"""
-        return '{0:.2f} seconds'.format(self.end_b - self.start)
+        return '{0:.4f} seconds'.format(self.end_b - self.start)
 
     def report_stats(self):
         """Report Stats"""
