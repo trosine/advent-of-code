@@ -9,12 +9,21 @@ PUZZLE = aoc.Puzzle(day=6, year=2023)
 
 def count_better(time, minimum):
     """Determine how many different ways to get better distances"""
-    better = 0
-    for held in range(time):
-        run_time = time - held
-        if held * run_time > minimum:
-            better += 1
-    return better
+    # calculate how many possibilities are worse on either end, without
+    # calculating all of the ones in between
+    worse = 0
+    ranges = (
+        range(time),
+        range(time-1, 0, -1),
+    )
+    for range_ in ranges:
+        for held in range_:
+            run_time = time - held
+            if held * run_time <= minimum:
+                worse += 1
+            else:
+                break
+    return time-worse
 
 
 def solve(part='a'):
@@ -26,6 +35,7 @@ def solve(part='a'):
     times = map(int, times.split(":")[1].split())
     distances = map(int, distances.split(":")[1].split())
     races = zip(times, distances)
+
     product = 1
     for race in races:
         product *= count_better(*race)
