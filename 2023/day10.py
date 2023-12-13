@@ -2,6 +2,8 @@
 """
 https://adventofcode.com/2023/day/10
 """
+from collections import defaultdict
+from queue import Queue
 from point import Point2D
 import aoc
 
@@ -23,38 +25,103 @@ DIRECTIONS = {
     "w": Point2D(0, -1),
     "e": Point2D(0, 1),
 }
+ZOOM = {
+    "n": "|",
+    "s": "|",
+    "w": "-",
+    "e": "-",
+}
+
+
+class Pixel:
+    """Represents a single pixel in a grid of pipes"""
+
+    def __init__(self, glyph="."):
+        self.glyph = glyph
+        self.connects = PIPES[glyph]
+        self.kind = None
+
+    def __str__(self):
+        return self.glyph
+
+    def __contains__(self, item):
+        return item in self.connects
+
+    def exit(self, start):
+        """Determine the other end of the pipe, given start"""
+        return self.connects.replace(start, "")
+
+
+def count_inside(grid):
+    """Count the number cells contained within the loop"""
+    last = max(grid)
+    search = Queue()
+    for row in range(0, last.x, 2):
+        for col in range(0, last.y, 2):
+            pos = Point2D(row, col)
+            if grid[pos].kind == "loop":
+                search.put(pos + Point2D(1, 1))
+                break
+        if search.qsize() > 0:
+            break
+
+    inside = 0
+    while search.qsize() > 0:
+        pos = search.get()
+        if grid[pos].kind:
+            # already seen this one
+            continue
+        grid[pos].kind = "inside"
+        if (pos.x % 2) == 0 and (pos.y % 2) == 0:
+            inside += 1
+        for direction in Point2D.cardinals:
+            new_pos = pos + direction
+            if (0 <= new_pos.x <= last.x) and (0 <= new_pos.y <= last.y):
+                search.put(new_pos)
+    return inside
 
 
 def solve(part='a'):
     """Solve puzzle"""
-    if part == 'b':
-        return None
-    grid = {}
+    grid = defaultdict(Pixel)
+    row = None
+    col = None
     for row, line in enumerate(PUZZLE.input.splitlines()):
         for col, char in enumerate(line):
-            location = Point2D(row, col)
-            grid[location] = PIPES.get(char)
+            location = Point2D(2*row, 2*col)
+            grid[location] = Pixel(char)
             if char == "S":
                 start = location
+                grid[location].kind = "loop"
 
     dest = None
+    compass = None
     # figure out which way to go around the loop
     # this assumes that only 2 pipes are pointing toward the start
-    for name, direction in DIRECTIONS.items():
-        source = name.translate(CONNECT)
-        if source in grid[start + direction]:
+    for compass, direction in DIRECTIONS.items():
+        source = compass.translate(CONNECT)
+        if source in grid[start + direction + direction]:
             dest = start + direction
             break
 
     steps = 1
+    extend = True
     while dest != start:
-        name = grid[dest].replace(source, "")  # the direction we're now headed
-        source = name.translate(CONNECT)
-        dest += DIRECTIONS[name]
-        steps += 1
-    return steps // 2
+        if extend:
+            grid[dest] = Pixel(ZOOM[compass])
+        else:
+            source = compass.translate(CONNECT)
+            compass = grid[dest].exit(source)  # the direction we're now headed
+            steps += 1
+        grid[dest].kind = "loop"
+        dest += DIRECTIONS[compass]  # move through the pipe
+        extend = not extend
+
+    if part == "a":
+        return steps // 2
+    return count_inside(grid)
 
 
 if __name__ == "__main__":
     PUZZLE.report_a(solve('a'))
-    # PUZZLE.report_b(solve('b'))
+    PUZZLE.report_b(solve('b'))
