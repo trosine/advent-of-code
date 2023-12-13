@@ -36,7 +36,7 @@ class PointFunctions:
         return type(self)(*elements)
 
 
-class Point2D(namedtuple("Point2D", ["x", "y"]), PointFunctions):
+class Point2D(PointFunctions, namedtuple("Point2D", ["x", "y"])):
     """A 2D Coordinate Point"""
     cardinals = [
         (-1, 0),
