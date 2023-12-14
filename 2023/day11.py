@@ -9,14 +9,14 @@ import aoc
 PUZZLE = aoc.Puzzle(day=11, year=2023)
 
 
-def expansions(start, end, to_expand, expansion):
+def expansions(start, end, to_expand):
     """Calculate how much space is added due to expansion"""
     distance = 0
     big = max(start, end)
     small = min(start, end)
     for row in to_expand:
         if small < row < big:
-            distance += expansion
+            distance += 1
     return distance
 
 
@@ -40,10 +40,9 @@ def solve(part='a'):
 
     total = 0
     for source, dest in combinations(galaxies, 2):
-        distance = source.distance(dest)
-        distance += expansions(source.x, dest.x, rows_to_expand, expansion)
-        distance += expansions(source.y, dest.y, cols_to_expand, expansion)
-        total += distance
+        total = source.distance(dest)
+        total += expansion * expansions(source.x, dest.x, rows_to_expand)
+        total += expansion * expansions(source.y, dest.y, cols_to_expand)
     return total
 
 
