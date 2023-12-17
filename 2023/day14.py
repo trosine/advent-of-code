@@ -19,20 +19,19 @@ def tilt(platform, direction):
         view = platform[:, ::-1]
 
     for row in view:
-        for pivot, value in enumerate(row):
-            if value in "#O":
+        pivot = 0
+        while pivot < len(row):
+            if row[pivot] in "#O":
+                pivot += 1
                 continue
-            next_pivot = False
             for offset in range(pivot+1, len(row)):
                 if row[offset] == "#":
-                    next_pivot = True
+                    pivot = offset
                     break
                 if row[offset] == "O":
                     row[pivot], row[offset] = row[offset], row[pivot]
-                    next_pivot = True
-                    break
-            if next_pivot:
-                continue
+                    pivot += 1
+            pivot += 1
 
 
 def load(platform):
