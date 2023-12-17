@@ -2,8 +2,7 @@
 """
 https://adventofcode.com/2023/day/10
 """
-from collections import defaultdict
-from queue import Queue
+from collections import defaultdict, deque
 from point import Point2D
 import aoc
 
@@ -55,19 +54,19 @@ class Pixel:
 def count_inside(grid):
     """Count the number cells contained within the loop"""
     last = max(grid)
-    search = Queue()
+    search = deque()
     for row in range(0, last.x, 2):
         for col in range(0, last.y, 2):
             pos = Point2D(row, col)
             if grid[pos].kind == "loop":
-                search.put(pos + Point2D(1, 1))
+                search.append(pos + Point2D(1, 1))
                 break
-        if search.qsize() > 0:
+        if search:
             break
 
     inside = 0
-    while search.qsize() > 0:
-        pos = search.get()
+    while search:
+        pos = search.pop()
         if grid[pos].kind:
             # already seen this one
             continue
@@ -77,7 +76,7 @@ def count_inside(grid):
         for direction in Point2D.cardinals:
             new_pos = pos + direction
             if (0 <= new_pos.x <= last.x) and (0 <= new_pos.y <= last.y):
-                search.put(new_pos)
+                search.append(new_pos)
     return inside
 
 
