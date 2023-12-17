@@ -3,6 +3,7 @@
 https://adventofcode.com/2023/day/16
 """
 from collections import deque
+from itertools import product
 from point import Point2D
 import aoc
 
@@ -82,31 +83,53 @@ class Space:
             yield dest, Point.named_dirs[dest]
 
 
-def solve(part="a"):
-    """Solve puzzle"""
-    if part == "b":
-        return None
-    grid = {}
-    for row, line in enumerate(PUZZLE.input.splitlines()):
-        for col, char in enumerate(line):
-            grid[Point(row, col)] = Space(char)
-    grid_max = Point(row, col)  # pylint: disable=undefined-loop-variable
-
-    total = 0
+def count_energized(grid, grid_max, pos, source):
+    """Count the number of energized spaces"""
+    energized = set()
     queue = deque()
-    queue.append((Point(0, 0), "l"))
+    queue.append((pos, source))
     while queue:
         current, source = queue.pop()
         space = grid[current]
         if source in space.light_sources:
             continue  # already seen
-        if not space.energized:
-            total += 1
+        energized.add(current)
         for dir_name, direction in space.travel(source):
             new_pos = current + direction
             if 0 <= new_pos.x <= grid_max.x and 0 <= new_pos.y <= grid_max.y:
                 queue.append((new_pos, space.to_source(dir_name)))
-    return total
+    value = len(energized)
+    # reset the grid
+    for current in energized:
+        grid[current].light_sources.clear()
+    return value
+
+
+def solve(part="a"):
+    """Solve puzzle"""
+    grid = {}
+    row = None
+    col = None
+    for row, line in enumerate(PUZZLE.input.splitlines()):
+        for col, char in enumerate(line):
+            grid[Point(row, col)] = Space(char)
+    grid_max = Point(row, col)
+
+    best = 0
+    starts = [
+        ("l", range(grid_max.x+1), [0]),
+        ("r", range(grid_max.x+1), [grid_max.y]),
+        ("u", [0],                 range(grid_max.y+1)),
+        ("d", [grid_max.x],        range(grid_max.y+1)),
+    ]
+    if part == "a":
+        starts = [("l", [0], [0])]
+
+    for source, rows, cols in starts:
+        for pos in product(rows, cols):
+            count = count_energized(grid, grid_max, Point(*pos), source)
+            best = max(best, count)
+    return best
 
 
 if __name__ == "__main__":
