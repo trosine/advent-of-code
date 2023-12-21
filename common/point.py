@@ -50,3 +50,14 @@ class Point2D(PointFunctions, namedtuple("Point2D", ["x", "y"])):
         (1, -1),
         (1, 1),
     ]
+
+    def neighbors(self, directions):
+        """Yield neighboring points by adding each direction to self"""
+        for direction in directions:
+            yield self + direction
+
+
+direction_cardinals = {
+    "UDLR"[i]: d
+    for i, d in enumerate(Point2D.cardinals)
+}
