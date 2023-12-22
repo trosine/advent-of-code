@@ -1,10 +1,10 @@
 """Coordinate system point management"""
 
 from collections import namedtuple
-from operator import add, sub
+from operator import add, sub, mul
 
 
-class PointFunctions:
+class PointFunctions(tuple):
     """Functions that can be mixed in to handle management of coordinates"""
 
     def __abs__(self):
@@ -12,6 +12,13 @@ class PointFunctions:
 
     def __add__(self, right):
         return type(self)(*map(add, self, right))
+
+    def __mul__(self, right):
+        if isinstance(right, int):
+            return type(self)(*(x * right for x in self))
+        if isinstance(right, (tuple, list)):
+            return type(self)(*map(mul, self, right))
+        assert False, "Right hand operand of * must either be int or tuple"
 
     def __sub__(self, right):
         return type(self)(*map(sub, self, right))
@@ -58,6 +65,6 @@ class Point2D(PointFunctions, namedtuple("Point2D", ["x", "y"])):
 
 
 direction_cardinals = {
-    "UDLR"[i]: d
+    "UDLR"[i]: Point2D(*d)
     for i, d in enumerate(Point2D.cardinals)
 }
