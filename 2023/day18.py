@@ -2,7 +2,6 @@
 """
 https://adventofcode.com/2023/day/18
 """
-from collections import deque
 from PIL import Image, ImageDraw
 from point import Point2D, direction_cardinals
 import aoc
@@ -44,7 +43,7 @@ def solve(part="a"):
             "0123"[i]: direction_cardinals[d]
             for i, d in enumerate("RDLU")
         }
-    corners = deque()
+    corners = []
     current = Point2D(0, 0)
     # find all of the corners
     for line in PUZZLE.input.splitlines():
@@ -61,15 +60,13 @@ def solve(part="a"):
     # add 1/2 of the perimeter to adjust for unit calculations
     #   rect(0,0 to 2,6) is really 3*7
     # not sure how to explain the final `+1` yet
-    previous = corners.pop()
-    corners.appendleft(previous)
+    # the use of -1 as the start to enumerate allows this to "wrap around"
     total = 0
     perimeter = 0
-    while corners:
-        current = corners.pop()
+    for prev, current in enumerate(corners, -1):
+        previous = corners[prev]
         total += previous.x * current.y - previous.y * current.x
         perimeter += current.distance(previous)
-        previous = current
     total = (abs(total) + perimeter) // 2
     return total + 1
 
