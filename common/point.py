@@ -64,6 +64,10 @@ class Point2D(PointFunctions, namedtuple("Point2D", ["x", "y"])):
             yield self + direction
 
 
+class Point3D(PointFunctions, namedtuple("Point3D", ["x", "y", "z"])):
+    """A 3-Dimentional point"""
+
+
 direction_cardinals = {
     "UDLR"[i]: Point2D(*d)
     for i, d in enumerate(Point2D.cardinals)
